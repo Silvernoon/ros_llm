@@ -1,0 +1,39 @@
+# Ignore build artifacts
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+*.egg
+
+# ROS
+*.bag
+*.db3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Models (large files)
+*.pt
+*.pth
+*.onnx
+*.bin
+models/
+checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db

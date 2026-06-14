@@ -1,0 +1,45 @@
+# LLM Navigation Commander Configuration
+
+llm_nav_commander:
+  ros__parameters:
+    # Model configuration
+    model_name: "google/gemma-4-E2B"
+    device: "cuda"  # or "cpu"
+    
+    # Topic configuration
+    image_topic: "/camera/image_raw"
+    detections_topic: "/yoloe/detections"
+    cmd_vel_topic: "/cmd_vel"
+    odom_topic: "/odom"
+    goal_topic: "/navigation_goal"
+    analysis_topic: "/scene_analysis"
+    command_topic: "/nav_command"
+    
+    # Control parameters
+    update_rate: 2.0  # Hz
+    enable_auto_navigation: false  # Set to true for autonomous mode
+    
+    # Speed settings (m/s and rad/s)
+    linear_speed_slow: 0.2
+    linear_speed_medium: 0.4
+    linear_speed_fast: 0.6
+    angular_speed_slow: 0.3
+    angular_speed_medium: 0.6
+    angular_speed_fast: 0.9
+
+scene_analyzer:
+  ros__parameters:
+    # Model configuration
+    model_name: "google/gemma-4-E2B"
+    device: "cuda"
+    
+    # Topic configuration
+    image_topic: "/camera/image_raw"
+    detections_topic: "/yoloe/detections"
+    analysis_topic: "/scene_analysis"
+    query_topic: "/scene_query"
+    response_topic: "/scene_response"
+    
+    # Analysis parameters
+    analysis_rate: 1.0  # Hz
+    auto_analyze: true
