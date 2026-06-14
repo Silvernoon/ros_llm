@@ -92,8 +92,9 @@ class GemmaVisionModel:
         """
         # Build message content. Image is optional so the model can be tested
         # with text-only input (no camera feed required).
+        text_only = image is None
         content: List[Dict[str, Any]] = []
-        if image is not None:
+        if not text_only:
             # Convert numpy array to PIL Image
             if isinstance(image, np.ndarray):
                 pil_image = Image.fromarray(image)
@@ -111,15 +112,33 @@ class GemmaVisionModel:
             }
         ]
 
-        # Process input using chat template
-        inputs = self.processor.apply_chat_template(
-            messages,
-            tokenize=True,
-            return_dict=True,
-            return_tensors="pt",
-            add_generation_prompt=True,
-            enable_thinking=enable_thinking,
-        )
+        # The multimodal processor has no chat template for text-only input,
+        # so fall back to the underlying tokenizer in that case.
+        if text_only:
+            tokenizer = getattr(self.processor, "tokenizer", None)
+            if tokenizer is None:
+                raise RuntimeError(
+                    "Text-only inference requires a tokenizer, but the processor "
+                    "does not expose one."
+                )
+            text_messages = [{"role": "user", "content": prompt}]
+            inputs = tokenizer.apply_chat_template(
+                text_messages,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+                add_generation_prompt=True,
+            )
+        else:
+            # Process input using chat template
+            inputs = self.processor.apply_chat_template(
+                messages,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+                add_generation_prompt=True,
+                enable_thinking=enable_thinking,
+            )
 
         # Move to device
         inputs = inputs.to(self.model.device)
@@ -136,7 +155,13 @@ class GemmaVisionModel:
                 do_sample=True,
             )
 
-        # Decode
+        # Decode. Text-only uses the tokenizer; multimodal uses the processor.
+        if text_only:
+            response = self.processor.tokenizer.decode(
+                outputs[0][input_len:], skip_special_tokens=True
+            )
+            return response.strip()
+
         response = self.processor.decode(
             outputs[0][input_len:], skip_special_tokens=False
         )
