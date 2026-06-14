@@ -3,6 +3,11 @@
 llm_nav_commander:
   ros__parameters:
     # Model configuration
+    # Can be HuggingFace model ID or local path to checkpoint
+    # Examples:
+    #   - "google/gemma-4-E2B"  (download from HuggingFace)
+    #   - "/home/user/models/gemma-4-E2B"  (local checkpoint)
+    #   - "./checkpoints/gemma-4-E2B"  (relative path)
     model_name: "google/gemma-4-E2B"
     device: "cuda"  # or "cpu"
     
