@@ -67,7 +67,7 @@ class GemmaVisionModel:
 
     def generate_response(
         self,
-        image: np.ndarray,
+        image: Optional[np.ndarray],
         prompt: str,
         max_new_tokens: int = 512,
         temperature: float = 1.0,
@@ -79,7 +79,7 @@ class GemmaVisionModel:
         Generate text response based on image and prompt
 
         Args:
-            image: Input image as numpy array (RGB)
+            image: Input image as numpy array (RGB), or None for text-only mode
             prompt: Text prompt/question
             max_new_tokens: Maximum tokens to generate
             temperature: Sampling temperature (default 1.0 as per best practices)
@@ -90,21 +90,24 @@ class GemmaVisionModel:
         Returns:
             Generated text response
         """
-        # Convert numpy array to PIL Image
-        if isinstance(image, np.ndarray):
-            pil_image = Image.fromarray(image)
-        else:
-            pil_image = image
+        # Build message content. Image is optional so the model can be tested
+        # with text-only input (no camera feed required).
+        content: List[Dict[str, Any]] = []
+        if image is not None:
+            # Convert numpy array to PIL Image
+            if isinstance(image, np.ndarray):
+                pil_image = Image.fromarray(image)
+            else:
+                pil_image = image
+            # Image should come before text as per best practices
+            content.append({"type": "image", "image": pil_image})
+        content.append({"type": "text", "text": prompt})
 
         # Prepare messages in the format expected by Gemma 4
-        # Image should come before text as per best practices
         messages = [
             {
                 "role": "user",
-                "content": [
-                    {"type": "image", "image": pil_image},
-                    {"type": "text", "text": prompt},
-                ],
+                "content": content,
             }
         ]
 
@@ -282,12 +285,12 @@ class GemmaVisionModel:
         except Exception:
             return default_command
 
-    def ask_question(self, image: np.ndarray, question: str) -> str:
+    def ask_question(self, image: Optional[np.ndarray], question: str) -> str:
         """
         Ask a question about the image
 
         Args:
-            image: Input image
+            image: Input image, or None for text-only questions
             question: Question to ask
 
         Returns:

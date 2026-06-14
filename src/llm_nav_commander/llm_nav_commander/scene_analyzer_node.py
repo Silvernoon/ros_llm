@@ -142,30 +142,32 @@ class SceneAnalyzerNode(Node):
     
     def query_callback(self, msg: String):
         """Handle custom queries about the scene"""
-        if self.latest_image is None:
-            self.get_logger().warn('No image available for query')
-            return
-        
         if self.model is None:
             self.get_logger().error('Model not loaded')
             return
-        
+
         try:
             question = msg.data
+            if self.latest_image is None:
+                self.get_logger().info(
+                    'No image available, answering query in text-only mode'
+                )
             self.get_logger().info(f'Processing query: {question}')
-            
+
+            # latest_image may be None -> text-only inference
             answer = self.model.ask_question(self.latest_image, question)
-            
+
             response_msg = String()
             response_msg.data = json.dumps({
                 'question': question,
                 'answer': answer,
+                'text_only': self.latest_image is None,
                 'timestamp': self.get_clock().now().to_msg().sec
             }, indent=2)
-            
+
             self.response_pub.publish(response_msg)
             self.get_logger().info(f'Answer: {answer[:100]}...')
-            
+
         except Exception as e:
             self.get_logger().error(f'Error processing query: {e}')
     
