@@ -15,7 +15,7 @@ import numpy as np
 class GemmaVisionModel:
     """Wrapper for Google Gemma-4-E2B vision-language model"""
 
-    def __init__(self, model_name: str = "google/gemma-4-E2B", device: str = "cuda"):
+    def __init__(self, model_name: str = "google/gemma-4-E2B-it", device: str = "cuda"):
         """
         Initialize Gemma model
 
@@ -112,23 +112,17 @@ class GemmaVisionModel:
             }
         ]
 
-        # The multimodal processor has no chat template for text-only input,
-        # so fall back to the underlying tokenizer in that case.
+        # The instruction-tuned (-it) processor carries the chat template for both
+        # text and multimodal input. Text-only follows the documented text path.
         if text_only:
-            tokenizer = getattr(self.processor, "tokenizer", None)
-            if tokenizer is None:
-                raise RuntimeError(
-                    "Text-only inference requires a tokenizer, but the processor "
-                    "does not expose one."
-                )
             text_messages = [{"role": "user", "content": prompt}]
-            inputs = tokenizer.apply_chat_template(
+            text = self.processor.apply_chat_template(
                 text_messages,
-                tokenize=True,
-                return_dict=True,
-                return_tensors="pt",
+                tokenize=False,
                 add_generation_prompt=True,
+                enable_thinking=enable_thinking,
             )
+            inputs = self.processor(text=text, return_tensors="pt")
         else:
             # Process input using chat template
             inputs = self.processor.apply_chat_template(
@@ -155,13 +149,7 @@ class GemmaVisionModel:
                 do_sample=True,
             )
 
-        # Decode. Text-only uses the tokenizer; multimodal uses the processor.
-        if text_only:
-            response = self.processor.tokenizer.decode(
-                outputs[0][input_len:], skip_special_tokens=True
-            )
-            return response.strip()
-
+        # Decode
         response = self.processor.decode(
             outputs[0][input_len:], skip_special_tokens=False
         )

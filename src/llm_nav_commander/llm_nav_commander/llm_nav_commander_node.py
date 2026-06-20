@@ -29,7 +29,7 @@ class LLMNavCommanderNode(Node):
         super().__init__("llm_nav_commander")
 
         # Declare parameters
-        self.declare_parameter("model_name", "google/gemma-4-E2B")
+        self.declare_parameter("model_name", "google/gemma-4-E2B-it")
         self.declare_parameter("device", "cuda")
         self.declare_parameter("image_topic", "/camera/image_raw")
         self.declare_parameter("detections_topic", "/yoloe/detections")

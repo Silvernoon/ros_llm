@@ -11,7 +11,7 @@ def generate_launch_description():
     # Declare arguments
     model_name_arg = DeclareLaunchArgument(
         'model_name',
-        default_value='google/gemma-4-E2B',
+        default_value='google/gemma-4-E2B-it',
         description='Hugging Face model name'
     )
     

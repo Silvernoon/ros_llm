@@ -5,10 +5,10 @@ llm_nav_commander:
     # Model configuration
     # Can be HuggingFace model ID or local path to checkpoint
     # Examples:
-    #   - "google/gemma-4-E2B"  (download from HuggingFace)
-    #   - "/home/user/models/gemma-4-E2B"  (local checkpoint)
-    #   - "./checkpoints/gemma-4-E2B"  (relative path)
-    model_name: "google/gemma-4-E2B"
+    #   - "google/gemma-4-E2B-it"  (download from HuggingFace)
+    #   - "/home/user/models/gemma-4-E2B-it"  (local checkpoint)
+    #   - "./checkpoints/gemma-4-E2B-it"  (relative path)
+    model_name: "google/gemma-4-E2B-it"
     device: "cuda"  # or "cpu"
     
     # Topic configuration
@@ -35,7 +35,7 @@ llm_nav_commander:
 scene_analyzer:
   ros__parameters:
     # Model configuration
-    model_name: "google/gemma-4-E2B"
+    model_name: "google/gemma-4-E2B-it"
     device: "cuda"
     
     # Topic configuration
